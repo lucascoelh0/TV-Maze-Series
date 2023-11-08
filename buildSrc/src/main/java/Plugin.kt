@@ -17,4 +17,8 @@ object Plugin {
         const val android = "kotlin-android"
         const val kapt = "kapt"
     }
+
+    object Ksp {
+        const val android = "com.google.devtools.ksp"
+    }
 }

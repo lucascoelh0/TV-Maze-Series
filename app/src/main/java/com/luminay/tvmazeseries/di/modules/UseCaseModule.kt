@@ -12,5 +12,5 @@ import dagger.hilt.components.SingletonComponent
 interface UseCaseModule {
 
     @Binds
-    fun providesMatchesUseCase(showsUseCase: ShowsUseCaseImpl): IShowsUseCase
+    fun providesShowsUseCase(showsUseCase: ShowsUseCaseImpl): IShowsUseCase
 }

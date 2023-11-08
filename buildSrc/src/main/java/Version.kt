@@ -26,4 +26,6 @@ object Version {
     const val composeDestinations = "1.8.39-beta"
     const val mockk = "1.13.5"
     const val coroutinesTesting = "1.7.3"
+    const val splashScreen = "1.0.1"
+    const val ksp = "1.8.10-1.0.9"
 }

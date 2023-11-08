@@ -3,6 +3,7 @@ plugins {
     id(Plugin.Kotlin.android)
     id(Plugin.Jetbrains.kotlin)
     id(Plugin.Hilt.android)
+    id(Plugin.Ksp.android)
     kotlin(Plugin.Kotlin.kapt)
 }
 
@@ -61,6 +62,7 @@ dependencies {
     implementation(project(Modules.Domain.name))
     implementation(Dependencies.AndroidX.coreKtx)
     implementation(Dependencies.AndroidX.lifecycleRuntimeKtx)
+    implementation(Dependencies.AndroidX.splashScreen)
     implementation(Dependencies.Compose.activityCompose)
     implementation(Dependencies.Compose.ui)
     implementation(Dependencies.Compose.uiToolingPreview)
@@ -77,6 +79,8 @@ dependencies {
     implementation(Dependencies.SquareUp.retrofitConverterGson)
     implementation(Dependencies.Google.gson)
     implementation(Dependencies.Libraries.networkResponseAdapter)
+    implementation(Dependencies.Libraries.composeDestinationsCore)
+    ksp(Dependencies.Libraries.composeDestinationsKsp)
     kapt(Dependencies.Hilt.hiltCompiler)
     testImplementation(Dependencies.Test.junit)
     testImplementation(Dependencies.Test.mockk)
