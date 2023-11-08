@@ -15,5 +15,12 @@ data class NetworkModel(
             name = EMPTY_STRING,
             officialSite = EMPTY_STRING,
         )
+
+        val MOCK = NetworkModel(
+            country = CountryModel.MOCK,
+            id = 1,
+            name = "HBO",
+            officialSite = "https://www.hbo.com/",
+        )
     }
 }

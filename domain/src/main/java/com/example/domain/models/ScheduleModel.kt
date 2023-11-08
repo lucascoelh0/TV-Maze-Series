@@ -11,5 +11,10 @@ data class ScheduleModel(
             days = emptyList(),
             time = EMPTY_STRING,
         )
+
+        val MOCK = ScheduleModel(
+            days = listOf("Monday"),
+            time = "22:00",
+        )
     }
 }

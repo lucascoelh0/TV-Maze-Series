@@ -9,5 +9,9 @@ data class PreviousEpisodeModel(
         val EMPTY = PreviousEpisodeModel(
             href = EMPTY_STRING,
         )
+
+        val MOCK = PreviousEpisodeModel(
+            href = "https://api.tvmaze.com/episodes/1850540",
+        )
     }
 }

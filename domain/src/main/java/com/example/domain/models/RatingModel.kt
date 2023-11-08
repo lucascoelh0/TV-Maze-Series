@@ -7,5 +7,9 @@ data class RatingModel(
         val EMPTY = RatingModel(
             average = -1.0,
         )
+
+        val MOCK = RatingModel(
+            average = 8.0,
+        )
     }
 }

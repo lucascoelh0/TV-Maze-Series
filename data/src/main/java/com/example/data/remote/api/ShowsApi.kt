@@ -9,7 +9,7 @@ import retrofit2.http.Query
 interface ShowsApi {
 
     @GET("/shows")
-    fun getShows(
+    suspend fun getShows(
         @Query("page") page: Int = 0
     ): NetworkResponse<List<ShowDto>, GenericErrorResponse>
 }

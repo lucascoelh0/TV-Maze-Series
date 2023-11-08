@@ -6,9 +6,9 @@ import com.example.data.remote.models.toModel
 import com.example.data.remote.utils.handleNetworkResponse
 import com.example.domain.models.ShowModel
 import com.example.domain.repositories.IShowsRepository
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import javax.inject.Inject
 
 class ShowsRepositoryImpl @Inject constructor(
     private val showsApi: ShowsApi,

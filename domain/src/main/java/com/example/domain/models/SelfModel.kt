@@ -9,5 +9,9 @@ data class SelfModel(
         val EMPTY = SelfModel(
             href = EMPTY_STRING,
         )
+
+        val MOCK = SelfModel(
+            href = "https://api.tvmaze.com/shows/1",
+        )
     }
 }

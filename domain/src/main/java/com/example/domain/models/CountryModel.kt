@@ -13,5 +13,11 @@ data class CountryModel(
             name = EMPTY_STRING,
             timezone = EMPTY_STRING,
         )
+
+        val MOCK = CountryModel(
+            code = "US",
+            name = "United States",
+            timezone = "America/New_York",
+        )
     }
 }

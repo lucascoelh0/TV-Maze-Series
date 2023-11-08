@@ -22,4 +22,30 @@ data class ShowModel(
     val updated: Int,
     val url: String,
     val weight: Int,
-)
+) {
+    companion object {
+        val MOCK = ShowModel(
+            links = LinksModel.MOCK,
+            averageRuntime = 0,
+            ended = "",
+            externals = ExternalsModel.MOCK,
+            genres = emptyList(),
+            id = 0,
+            image = ImageModel.MOCK,
+            language = "",
+            name = "Under the Dome",
+            network = NetworkModel.MOCK,
+            officialSite = "",
+            premiered = "",
+            rating = RatingModel.MOCK,
+            runtime = 0,
+            schedule = ScheduleModel.MOCK,
+            status = "",
+            summary = "",
+            type = "",
+            updated = 0,
+            url = "",
+            weight = 0,
+        )
+    }
+}

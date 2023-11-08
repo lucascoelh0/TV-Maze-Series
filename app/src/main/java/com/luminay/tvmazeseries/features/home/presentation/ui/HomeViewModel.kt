@@ -29,8 +29,6 @@ class HomeViewModel @Inject constructor(
     private val _paginationStatus = MutableStateFlow<Resource<List<ShowModel>>>(Resource.loading(null))
     val paginationStatus: Flow<Resource<List<ShowModel>>> = _paginationStatus.asStateFlow()
 
-    lateinit var pressedShow: ShowModel
-
     private var currentPage = 1
     private var isPageLoading = false
 
@@ -77,4 +75,12 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    fun filterShowsBySearchTerm(
+        shows: List<ShowModel>,
+        searchTerm: String,
+    ): List<ShowModel> =
+        shows.filter { show ->
+            show.name.contains(searchTerm, ignoreCase = true)
+        }
 }

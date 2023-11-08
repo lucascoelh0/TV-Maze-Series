@@ -9,5 +9,10 @@ data class LinksModel(
             previousEpisode = PreviousEpisodeModel.EMPTY,
             self = SelfModel.EMPTY,
         )
+
+        val MOCK = LinksModel(
+            previousEpisode = PreviousEpisodeModel.MOCK,
+            self = SelfModel.MOCK,
+        )
     }
 }

@@ -13,5 +13,11 @@ data class ExternalsModel(
             theTvDb = 0,
             tvRage = 0,
         )
+
+        val MOCK = ExternalsModel(
+            imdb = "8.1",
+            theTvDb = 121361,
+            tvRage = 24493,
+        )
     }
 }
