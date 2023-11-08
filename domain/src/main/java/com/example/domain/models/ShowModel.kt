@@ -1,0 +1,25 @@
+package com.example.domain.models
+
+data class ShowModel(
+    val links: LinksModel,
+    val averageRuntime: Int,
+    val ended: String,
+    val externals: ExternalsModel,
+    val genres: List<String>,
+    val id: Int,
+    val image: ImageModel,
+    val language: String,
+    val name: String,
+    val network: NetworkModel,
+    val officialSite: String,
+    val premiered: String,
+    val rating: RatingModel,
+    val runtime: Int,
+    val schedule: ScheduleModel,
+    val status: String,
+    val summary: String,
+    val type: String,
+    val updated: Int,
+    val url: String,
+    val weight: Int,
+)
