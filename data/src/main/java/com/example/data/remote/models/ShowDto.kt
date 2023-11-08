@@ -54,6 +54,8 @@ data class ShowDto(
     val weight: Int? = null,
 )
 
+fun List<ShowDto>.toModel() = map { it.toModel() }
+
 fun ShowDto.toModel() = ShowModel(
     links = links?.toModel() ?: LinksModel.EMPTY,
     averageRuntime = averageRuntime ?: -1,
