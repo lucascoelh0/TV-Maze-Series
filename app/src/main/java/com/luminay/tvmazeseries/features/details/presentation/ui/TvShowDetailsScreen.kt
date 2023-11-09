@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,13 +25,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,12 +53,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.core.ext.formatSummary
 import com.example.core.models.Resource
 import com.example.core.models.Status
 import com.example.domain.models.EpisodeModel
@@ -66,6 +71,7 @@ import com.luminay.tvmazeseries.features.home.presentation.ui.ErrorMessage
 import com.luminay.tvmazeseries.theme.Blue100
 import com.luminay.tvmazeseries.theme.Blue80
 import com.luminay.tvmazeseries.theme.TvMazeSeriesTheme
+import com.luminay.tvmazeseries.ui.common.BottomSheet
 import com.luminay.tvmazeseries.ui.common.GradientOverlay
 import com.luminay.tvmazeseries.utils.coilutils.debugPlaceholder
 import com.luminay.tvmazeseries.utils.coilutils.setupBuilder
@@ -79,33 +85,46 @@ fun TvShowDetailsScreen(
     navigator: DestinationsNavigator,
     showModel: ShowModel,
 ) {
-    Scaffold(
-        topBar = {}
+    Surface(
+        modifier = Modifier.fillMaxSize(),
     ) {
         TvShowContentDetails(
-            paddingValues = it,
             showModel = showModel,
             onBack = { navigator.popBackStack() }
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TvShowContentDetails(
-    paddingValues: PaddingValues,
     showModel: ShowModel,
     onBack: () -> Unit,
     viewModel: TvShowDetailsViewModel = hiltViewModel(),
 ) {
     val episodes by viewModel.episodes.collectAsStateWithLifecycle(initialValue = null)
     val selectedSeason by viewModel.selectedSeason.collectAsStateWithLifecycle(initialValue = 0)
+    var showDetailsBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.fetchData(showModel.id)
     }
 
+    if (showDetailsBottomSheet) {
+        BottomSheet(
+            onDismiss = { showDetailsBottomSheet = false },
+            content = {
+                EpisodeDetails(
+                    episode = viewModel.clickedEpisode,
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+
     Column(
-        modifier = Modifier.padding(paddingValues = paddingValues),
+        modifier = Modifier
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.Start,
     ) {
         TvShowHeader(
@@ -131,7 +150,7 @@ fun TvShowContentDetails(
         )
 
         Summary(
-            summary = showModel.summary,
+            summary = showModel.summary.formatSummary(),
             modifier = Modifier
                 .padding(
                     top = 16.dp,
@@ -147,7 +166,8 @@ fun TvShowContentDetails(
                 viewModel.setSelectedSeason(seasonNumber)
             },
             onEpisodeClick = { episode ->
-//                TODO()
+                viewModel.clickedEpisode = episode
+                showDetailsBottomSheet = true
             },
             groupEpisodes = { groupedEpisodes ->
                 viewModel.groupEpisodesBySeason(groupedEpisodes)
@@ -197,7 +217,7 @@ fun TvShowHeader(
             contentDescription = stringResource(id = R.string.back_description),
             modifier = Modifier
                 .padding(
-                    top = 16.dp,
+                    top = 48.dp,
                     start = 16.dp,
                 )
                 .clickable { onBack() }
@@ -397,14 +417,20 @@ fun SeasonsStatus(
     ) {
         when (episodes?.status) {
             Status.LOADING -> {
-                CircularProgressIndicator(
-                    color = Color.White,
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp),
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = Color.White,
+                    )
+                }
             }
 
             Status.SUCCESS -> {
                 episodes.data?.let { episodesData ->
-//                    TODO("Check if onSeasonClick = onSeasonClick works")
                     if (episodesData.isNotEmpty()) {
                         val seasonsWithEpisodes = remember { groupEpisodes(episodesData) }
 
@@ -523,19 +549,10 @@ fun EpisodeItem(
             .width(128.dp)
             .clickable { onEpisodeClick(episode) }
     ) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .setupBuilder(
-                    url = episode.image.original,
-                    name = episode.name,
-                ),
-            contentDescription = stringResource(id = R.string.episode_image),
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .fillMaxWidth()
-                .size(128.dp, 72.dp),
-            contentScale = ContentScale.Crop,
-            placeholder = debugPlaceholder(debugPreview = R.drawable.poster_placeholder),
+        EpisodeImage(
+            imageUrl = episode.image.original,
+            episodeName = episode.name,
+            height = 72.dp,
         )
 
         Text(
@@ -548,11 +565,32 @@ fun EpisodeItem(
     }
 }
 
+@Composable
+fun EpisodeImage(
+    imageUrl: String,
+    episodeName: String,
+    height: Dp,
+) {
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .setupBuilder(
+                url = imageUrl,
+                name = episodeName,
+            ),
+        contentDescription = stringResource(id = R.string.episode_image),
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .fillMaxWidth()
+            .height(height),
+        contentScale = ContentScale.Crop,
+        placeholder = debugPlaceholder(debugPreview = R.drawable.poster_placeholder),
+    )
+}
+
 @Preview
 @Composable
 fun TvShowContentDetailsPreview() {
     TvShowContentDetails(
-        paddingValues = PaddingValues(),
         showModel = ShowModel.MOCK,
         onBack = {},
     )

@@ -24,6 +24,8 @@ class TvShowDetailsViewModel @Inject constructor(
     private val _selectedSeason = MutableStateFlow(1)
     val selectedSeason = _selectedSeason.asStateFlow()
 
+    lateinit var clickedEpisode: EpisodeModel
+
     fun fetchData(showId: Int) = viewModelScope.launch {
         flow {
             emit(Resource.loading(null))
