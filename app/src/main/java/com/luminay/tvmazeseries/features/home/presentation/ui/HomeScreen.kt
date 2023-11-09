@@ -63,24 +63,28 @@ fun HomeScreen(
     navigator: DestinationsNavigator,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    val allShows by viewModel.allShows.collectAsStateWithLifecycle(initialValue = null)
-    var searchTerm by remember { mutableStateOf(EMPTY) }
+    val showsResource by viewModel.unifiedShows.collectAsStateWithLifecycle(initialValue = Resource.loading(null))
+    val searchTerm by viewModel.searchQuery.collectAsStateWithLifecycle(initialValue = EMPTY)
 
     Scaffold(
         topBar = {
             TopBar(
                 searchTerm = searchTerm,
                 onQueryChange = { value ->
-                    searchTerm = value
+                    viewModel.updateSearchQuery(value)
+                    viewModel.searchShows()
                 },
-                isSearchBarEnabled = allShows?.data is List<ShowModel>,
+                onSearch = {
+                    viewModel.searchShows()
+                },
+                isSearchBarEnabled = true,
             )
         }
     ) {
         TvShowStatus(
             paddingValues = it,
-            allShows = allShows,
-            searchTerm = searchTerm,
+            showsResource = showsResource,
+            searchQuery = searchTerm,
             onShowClick = { show ->
                 navigator.navigate(
                     TvShowDetailsScreenDestination(
@@ -98,8 +102,8 @@ fun HomeScreen(
 @Composable
 fun TvShowStatus(
     paddingValues: PaddingValues,
-    allShows: Resource<List<ShowModel>>?,
-    searchTerm: String,
+    showsResource: Resource<List<ShowModel>>?,
+    searchQuery: String,
     onShowClick: (ShowModel) -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
@@ -109,7 +113,7 @@ fun TvShowStatus(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        when (allShows?.status) {
+        when (showsResource?.status) {
             Status.LOADING -> {
                 CircularProgressIndicator(
                     color = Color.White,
@@ -117,12 +121,19 @@ fun TvShowStatus(
             }
 
             Status.SUCCESS -> {
-                allShows.data?.let { shows ->
-                    TvShowsList(
-                        shows = shows,
-                        searchTerm = searchTerm,
-                        onShowClick = onShowClick,
-                    )
+                showsResource.data?.let { shows ->
+                    if (shows.isNotEmpty()) {
+                        TvShowsList(
+                            shows = shows,
+                            onShowClick = onShowClick,
+                            searchQuery = searchQuery,
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(id = R.string.no_shows_found),
+                            color = Color.White,
+                        )
+                    }
                 } ?: run {
                     ErrorMessage(
                         onRetry = onRetry,
@@ -147,6 +158,7 @@ private fun TopBar(
     searchTerm: String,
     isSearchBarEnabled: Boolean,
     onQueryChange: (String) -> Unit,
+    onSearch: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -164,6 +176,7 @@ private fun TopBar(
             onQueryChange = {
                 onQueryChange(it)
             },
+            onSearch = onSearch,
             isEnabled = isSearchBarEnabled,
         )
     }
@@ -172,7 +185,7 @@ private fun TopBar(
 @Composable
 fun TvShowsList(
     shows: List<ShowModel>,
-    searchTerm: String,
+    searchQuery: String,
     onShowClick: (ShowModel) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
@@ -183,7 +196,7 @@ fun TvShowsList(
     var isRefreshing by remember { mutableStateOf(false) }
 
     fun refresh() {
-        if (searchTerm.isEmpty()) {
+        if (searchQuery.isEmpty()) {
             refreshScope.launch {
                 isRefreshing = true
                 viewModel.fetchData()
@@ -204,8 +217,6 @@ fun TvShowsList(
             }
     }
 
-    val filteredShows = viewModel.filterShowsBySearchTerm(shows, searchTerm)
-
     Box(modifier = modifier.pullRefresh(state)) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
@@ -215,7 +226,7 @@ fun TvShowsList(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            items(items = filteredShows) { show ->
+            items(items = shows) { show ->
                 TvShowItem(
                     show = show,
                     modifier = Modifier.clickable {
@@ -304,6 +315,7 @@ private fun TopBarPreview() {
     TopBar(
         searchTerm = EMPTY,
         onQueryChange = {},
+        onSearch = {},
         isSearchBarEnabled = true,
     )
 }
@@ -316,7 +328,7 @@ fun TvShowsListPreview() {
             ShowModel.MOCK,
             ShowModel.MOCK,
         ),
-        searchTerm = EMPTY,
+        searchQuery = EMPTY,
         onShowClick = {},
     )
 }

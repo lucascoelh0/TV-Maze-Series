@@ -6,15 +6,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,14 +29,18 @@ import com.luminay.tvmazeseries.theme.Blue100
 import com.luminay.tvmazeseries.theme.Blue80
 import com.luminay.tvmazeseries.theme.Gray80
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBarWithBorder(
     searchTerm: String,
     onQueryChange: (String) -> Unit,
+    onSearch: () -> Unit,
     modifier: Modifier = Modifier,
     borderColor: Color = Blue80,
     isEnabled: Boolean = true,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Box(
         modifier = modifier
             .scale(scaleY = 0.9F, scaleX = 1F)
@@ -71,6 +80,13 @@ fun SearchBarWithBorder(
                 )
             },
             singleLine = true,
+            keyboardActions = KeyboardActions(onSearch = {
+                onSearch()
+                keyboardController?.hide()
+            }),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Search
+            )
         )
     }
 }
@@ -81,5 +97,6 @@ fun PreviewSearchBarWithBorder() {
     SearchBarWithBorder(
         searchTerm = EMPTY,
         onQueryChange = {},
+        onSearch = {},
     )
 }

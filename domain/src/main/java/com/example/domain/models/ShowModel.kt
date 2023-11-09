@@ -30,6 +30,30 @@ data class ShowModel(
         get() = if (premiered.length >= 4) premiered.substring(0, 4) else "Unknown"
 
     companion object {
+        val EMPTY = ShowModel(
+            links = LinksModel.EMPTY,
+            averageRuntime = 0,
+            ended = "",
+            externals = ExternalsModel.EMPTY,
+            genres = emptyList(),
+            id = 0,
+            image = ImageModel.EMPTY,
+            language = "",
+            name = "",
+            network = NetworkModel.EMPTY,
+            officialSite = "",
+            premiered = "",
+            rating = RatingModel.EMPTY,
+            runtime = 0,
+            schedule = ScheduleModel.EMPTY,
+            status = "",
+            summary = "",
+            type = "",
+            updated = 0,
+            url = "",
+            weight = 0,
+        )
+
         val MOCK = ShowModel(
             links = LinksModel.MOCK,
             averageRuntime = 30,

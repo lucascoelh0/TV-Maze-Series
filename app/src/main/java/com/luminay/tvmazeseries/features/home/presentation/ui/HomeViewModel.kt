@@ -2,18 +2,24 @@ package com.luminay.tvmazeseries.features.home.presentation.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.core.constants.EMPTY
 import com.example.core.models.Resource
 import com.example.core.models.Status
+import com.example.domain.models.SearchShowModel
 import com.example.domain.models.ShowModel
 import com.example.domain.usecases.IShowsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -24,13 +30,45 @@ class HomeViewModel @Inject constructor(
     val isFirstLoadDone = _isFirstLoadDone.asStateFlow()
 
     private val _allShows = MutableStateFlow<Resource<List<ShowModel>>>(Resource.loading(null))
-    val allShows: Flow<Resource<List<ShowModel>>> = _allShows.asStateFlow()
 
     private val _paginationStatus = MutableStateFlow<Resource<List<ShowModel>>>(Resource.loading(null))
     val paginationStatus: Flow<Resource<List<ShowModel>>> = _paginationStatus.asStateFlow()
 
+    private val _searchQuery = MutableStateFlow(EMPTY)
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _searchResults = MutableStateFlow<Resource<List<SearchShowModel>>>(Resource.loading(null))
+
     private var currentPage = 1
     private var isPageLoading = false
+
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val unifiedShows: Flow<Resource<List<ShowModel>>> = _searchQuery.flatMapLatest { query ->
+        if (query.isBlank()) {
+            _allShows
+        } else {
+            _searchResults.map { searchResultsResource ->
+                when (searchResultsResource.status) {
+                    Status.SUCCESS -> {
+                        Resource.success(searchResultsResource.data?.map { it.show } ?: emptyList())
+                    }
+
+                    Status.LOADING -> {
+                        Resource.loading(null)
+                    }
+
+                    else -> {
+                        Resource.error(
+                            searchResultsResource.message,
+                            null,
+                            null,
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     init {
         fetchData()
@@ -76,11 +114,26 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun filterShowsBySearchTerm(
-        shows: List<ShowModel>,
-        searchTerm: String,
-    ): List<ShowModel> =
-        shows.filter { show ->
-            show.name.contains(searchTerm, ignoreCase = true)
+    fun searchShows() {
+        _searchQuery.value.let { currentQuery ->
+            if (currentQuery.isBlank()) {
+                _searchResults.value = Resource.success(emptyList())
+                return
+            }
+
+            viewModelScope.launch {
+                flow {
+                    emit(Resource.loading(null))
+                    emitAll(showsUseCase.searchShows(currentQuery))
+                }.collect { result ->
+                    _searchResults.value = result
+                }
+            }
         }
+    }
+
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
 }

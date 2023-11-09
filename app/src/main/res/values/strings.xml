@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">TV Maze Series</string>
     <string name="loading_error">There was an error loading the tv shows data. Try again</string>
+    <string name="no_shows_found">No shows found</string>
     <string name="try_again">Try again</string>
     <string name="tv_show_item_content_description">Tv show item</string>
     <string name="episode_image">Episode image</string>

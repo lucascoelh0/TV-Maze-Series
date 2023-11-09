@@ -5,6 +5,7 @@ import com.example.data.remote.api.ShowsApi
 import com.example.data.remote.models.toModel
 import com.example.data.remote.utils.handleNetworkResponse
 import com.example.domain.models.EpisodeModel
+import com.example.domain.models.SearchShowModel
 import com.example.domain.models.ShowModel
 import com.example.domain.repositories.IShowsRepository
 import javax.inject.Inject
@@ -21,6 +22,20 @@ class ShowsRepositoryImpl @Inject constructor(
         return flow {
             val response = showsApi.getShows(
                 page = page,
+            )
+            val resource = handleNetworkResponse(response) {
+                it.toModel()
+            }
+            emit(resource)
+        }
+    }
+
+    override fun searchShows(
+        query: String,
+    ): Flow<Resource<List<SearchShowModel>>> {
+        return flow {
+            val response = showsApi.searchShows(
+                query = query,
             )
             val resource = handleNetworkResponse(response) {
                 it.toModel()
