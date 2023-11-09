@@ -1,6 +1,5 @@
 package com.example.data.remote.models
 
-import com.example.domain.models.CountryModel
 import com.example.domain.models.NetworkModel
 import com.google.gson.annotations.SerializedName
 
@@ -16,7 +15,7 @@ data class NetworkDto(
 )
 
 fun NetworkDto.toModel() = NetworkModel(
-    country = country?.toModel() ?: CountryModel.EMPTY,
+    country = country?.toModel() ?: CountryDto().toModel(),
     id = id ?: -1,
     name = name.orEmpty(),
     officialSite = officialSite.orEmpty(),

@@ -42,6 +42,7 @@ import com.example.core.models.Status
 import com.example.domain.models.ShowModel
 import com.luminay.tvmazeseries.R
 import com.luminay.tvmazeseries.common.extensions.isScrolledToEnd
+import com.luminay.tvmazeseries.destinations.TvShowDetailsScreenDestination
 import com.luminay.tvmazeseries.theme.Blue80
 import com.luminay.tvmazeseries.theme.Purple80
 import com.luminay.tvmazeseries.ui.common.SearchBarWithBorder
@@ -81,7 +82,12 @@ fun HomeScreen(
             allShows = allShows,
             searchTerm = searchTerm,
             onShowClick = { show ->
-//                TODO()
+                navigator.navigate(
+                    TvShowDetailsScreenDestination(
+                        id = id,
+                        showModel = show,
+                    )
+                )
             },
             onRetry = { viewModel.fetchData() },
             modifier = Modifier.fillMaxSize(),

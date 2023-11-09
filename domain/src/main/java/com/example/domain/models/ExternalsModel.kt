@@ -1,12 +1,13 @@
 package com.example.domain.models
 
+import java.io.Serializable
 import com.example.core.constants.EMPTY as EMPTY_STRING
 
 data class ExternalsModel(
     val imdb: String,
     val theTvDb: Int,
     val tvRage: Int,
-) {
+) : Serializable {
     companion object {
         val EMPTY = ExternalsModel(
             imdb = EMPTY_STRING,

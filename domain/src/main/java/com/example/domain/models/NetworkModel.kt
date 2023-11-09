@@ -1,5 +1,6 @@
 package com.example.domain.models
 
+import java.io.Serializable
 import com.example.core.constants.EMPTY as EMPTY_STRING
 
 data class NetworkModel(
@@ -7,7 +8,7 @@ data class NetworkModel(
     val id: Int,
     val name: String,
     val officialSite: String,
-) {
+) : Serializable {
     companion object {
         val EMPTY = NetworkModel(
             country = CountryModel.EMPTY,

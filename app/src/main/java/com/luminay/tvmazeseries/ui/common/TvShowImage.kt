@@ -6,10 +6,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import coil.compose.AsyncImage
-import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.luminay.tvmazeseries.R
 import com.luminay.tvmazeseries.utils.coilutils.debugPlaceholder
+import com.luminay.tvmazeseries.utils.coilutils.setupBuilder
 
 @Composable
 fun TvShowImage(
@@ -19,13 +19,10 @@ fun TvShowImage(
 ) {
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
-            .crossfade(true)
-            .data(image)
-            .diskCacheKey("$name $image")
-            .networkCachePolicy(CachePolicy.ENABLED)
-            .diskCachePolicy(CachePolicy.ENABLED)
-            .memoryCachePolicy(CachePolicy.ENABLED)
-            .build(),
+            .setupBuilder(
+                url = image,
+                name = name,
+            ),
         contentDescription = stringResource(id = R.string.tv_show_item_content_description),
         modifier = modifier,
         placeholder = debugPlaceholder(debugPreview = R.drawable.poster_placeholder),
