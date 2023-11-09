@@ -93,7 +93,7 @@ fun SearchBarWithBorder(
 
 @Preview
 @Composable
-fun PreviewSearchBarWithBorder() {
+private fun PreviewSearchBarWithBorder() {
     SearchBarWithBorder(
         searchTerm = EMPTY,
         onQueryChange = {},

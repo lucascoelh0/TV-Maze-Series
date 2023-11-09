@@ -14,11 +14,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -45,6 +40,9 @@ import com.luminay.tvmazeseries.common.extensions.isScrolledToEnd
 import com.luminay.tvmazeseries.destinations.TvShowDetailsScreenDestination
 import com.luminay.tvmazeseries.theme.Blue80
 import com.luminay.tvmazeseries.theme.Purple80
+import com.luminay.tvmazeseries.ui.common.ErrorMessage
+import com.luminay.tvmazeseries.ui.common.LoadingIndicator
+import com.luminay.tvmazeseries.ui.common.NoShowsFoundMessage
 import com.luminay.tvmazeseries.ui.common.SearchBarWithBorder
 import com.luminay.tvmazeseries.ui.common.TvShowItem
 import com.luminay.tvmazeseries.ui.common.pullrefresh.PullRefreshIndicator
@@ -100,7 +98,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun TvShowStatus(
+private fun TvShowStatus(
     paddingValues: PaddingValues,
     showsResource: Resource<List<ShowModel>>?,
     searchQuery: String,
@@ -114,41 +112,37 @@ fun TvShowStatus(
         verticalArrangement = Arrangement.Center,
     ) {
         when (showsResource?.status) {
-            Status.LOADING -> {
-                CircularProgressIndicator(
-                    color = Color.White,
-                )
-            }
+            Status.LOADING -> LoadingIndicator()
 
-            Status.SUCCESS -> {
-                showsResource.data?.let { shows ->
-                    if (shows.isNotEmpty()) {
-                        TvShowsList(
-                            shows = shows,
-                            onShowClick = onShowClick,
-                            searchQuery = searchQuery,
-                        )
-                    } else {
-                        Text(
-                            text = stringResource(id = R.string.no_shows_found),
-                            color = Color.White,
-                        )
-                    }
-                } ?: run {
-                    ErrorMessage(
-                        onRetry = onRetry,
-                        message = stringResource(id = R.string.loading_error),
-                        modifier = modifier,
-                    )
-                }
-            }
+            Status.SUCCESS -> ShowsListOrEmpty(
+                showsResource = showsResource,
+                searchQuery = searchQuery,
+                onShowClick = onShowClick,
+            )
 
-            else -> {
-                ErrorMessage(
-                    onRetry = onRetry,
-                    message = stringResource(id = R.string.loading_error),
-                )
-            }
+            else -> ErrorMessage(
+                onRetry,
+                stringResource(id = R.string.loading_error),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ShowsListOrEmpty(
+    showsResource: Resource<List<ShowModel>>,
+    searchQuery: String,
+    onShowClick: (ShowModel) -> Unit
+) {
+    showsResource.data?.let { shows ->
+        if (shows.isNotEmpty()) {
+            TvShowsList(
+                shows = shows,
+                searchQuery = searchQuery,
+                onShowClick = onShowClick,
+            )
+        } else {
+            NoShowsFoundMessage()
         }
     }
 }
@@ -247,10 +241,7 @@ fun TvShowsList(
                                 .fillMaxWidth()
                                 .padding(top = 24.dp),
                         ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.align(Alignment.Center),
-                                color = Color.White,
-                            )
+                            LoadingIndicator(modifier = Modifier.align(Alignment.Center))
                         }
                     }
 
@@ -276,39 +267,6 @@ fun TvShowsList(
     }
 }
 
-@Composable
-fun ErrorMessage(
-    onRetry: () -> Unit,
-    message: String,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = message,
-            textAlign = TextAlign.Center,
-            color = Color.White,
-        )
-
-        Button(
-            onClick = onRetry,
-            modifier = Modifier.padding(top = 16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Purple80,
-            ),
-        ) {
-            Text(
-                text = stringResource(id = R.string.try_again),
-                color = Color.White,
-            )
-        }
-    }
-}
-
 @Preview
 @Composable
 private fun TopBarPreview() {
@@ -322,7 +280,7 @@ private fun TopBarPreview() {
 
 @Preview
 @Composable
-fun TvShowsListPreview() {
+private fun TvShowsListPreview() {
     TvShowsList(
         shows = listOf(
             ShowModel.MOCK,
@@ -330,14 +288,5 @@ fun TvShowsListPreview() {
         ),
         searchQuery = EMPTY,
         onShowClick = {},
-    )
-}
-
-@Preview
-@Composable
-private fun ErrorMessagePreview() {
-    ErrorMessage(
-        onRetry = {},
-        stringResource(id = R.string.loading_error),
     )
 }

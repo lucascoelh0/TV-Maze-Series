@@ -24,6 +24,9 @@ class TvShowDetailsViewModel @Inject constructor(
     private val _selectedSeason = MutableStateFlow(1)
     val selectedSeason = _selectedSeason.asStateFlow()
 
+    private val _showDetailsBottomSheet = MutableStateFlow(false)
+    val showDetailsBottomSheet = _showDetailsBottomSheet.asStateFlow()
+
     lateinit var clickedEpisode: EpisodeModel
 
     fun fetchData(showId: Int) = viewModelScope.launch {
@@ -41,5 +44,13 @@ class TvShowDetailsViewModel @Inject constructor(
 
     fun setSelectedSeason(season: Int) {
         _selectedSeason.value = season
+    }
+
+    fun onShowDetailsRequested() {
+        _showDetailsBottomSheet.value = true
+    }
+
+    fun onDismissRequest() {
+        _showDetailsBottomSheet.value = false
     }
 }

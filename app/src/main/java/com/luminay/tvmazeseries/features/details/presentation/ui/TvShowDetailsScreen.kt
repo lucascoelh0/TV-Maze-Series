@@ -1,6 +1,5 @@
 package com.luminay.tvmazeseries.features.details.presentation.ui
 
-import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -29,7 +28,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -67,12 +65,14 @@ import com.example.domain.models.EpisodeModel
 import com.example.domain.models.ScheduleModel
 import com.example.domain.models.ShowModel
 import com.luminay.tvmazeseries.R
-import com.luminay.tvmazeseries.features.home.presentation.ui.ErrorMessage
 import com.luminay.tvmazeseries.theme.Blue100
 import com.luminay.tvmazeseries.theme.Blue80
 import com.luminay.tvmazeseries.theme.TvMazeSeriesTheme
 import com.luminay.tvmazeseries.ui.common.BottomSheet
+import com.luminay.tvmazeseries.ui.common.ErrorMessage
 import com.luminay.tvmazeseries.ui.common.GradientOverlay
+import com.luminay.tvmazeseries.ui.common.LoadingIndicator
+import com.luminay.tvmazeseries.ui.common.NoShowsFoundMessage
 import com.luminay.tvmazeseries.utils.coilutils.debugPlaceholder
 import com.luminay.tvmazeseries.utils.coilutils.setupBuilder
 import com.ramcosta.composedestinations.annotation.Destination
@@ -97,22 +97,22 @@ fun TvShowDetailsScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TvShowContentDetails(
+private fun TvShowContentDetails(
     showModel: ShowModel,
     onBack: () -> Unit,
     viewModel: TvShowDetailsViewModel = hiltViewModel(),
 ) {
     val episodes by viewModel.episodes.collectAsStateWithLifecycle(initialValue = null)
     val selectedSeason by viewModel.selectedSeason.collectAsStateWithLifecycle(initialValue = 0)
-    var showDetailsBottomSheet by remember { mutableStateOf(false) }
+    val showBottomSheet by viewModel.showDetailsBottomSheet.collectAsStateWithLifecycle(initialValue = false)
 
     LaunchedEffect(Unit) {
         viewModel.fetchData(showModel.id)
     }
 
-    if (showDetailsBottomSheet) {
+    if (showBottomSheet) {
         BottomSheet(
-            onDismiss = { showDetailsBottomSheet = false },
+            onDismiss = { viewModel.onDismissRequest() },
             content = {
                 EpisodeDetails(
                     episode = viewModel.clickedEpisode,
@@ -167,7 +167,7 @@ fun TvShowContentDetails(
             },
             onEpisodeClick = { episode ->
                 viewModel.clickedEpisode = episode
-                showDetailsBottomSheet = true
+                viewModel.onShowDetailsRequested()
             },
             groupEpisodes = { groupedEpisodes ->
                 viewModel.groupEpisodesBySeason(groupedEpisodes)
@@ -185,79 +185,160 @@ fun TvShowHeader(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val headerHeight by remember { mutableStateOf(250.dp) }
-    val gradientHeight by remember { mutableStateOf(100.dp) }
+    val headerHeight = 250.dp
+    val gradientHeight = 100.dp
 
     Box(
         modifier = modifier
             .height(headerHeight)
             .fillMaxWidth()
     ) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .setupBuilder(
-                    url = show.image.original,
-                    name = show.name,
-                ),
-            contentDescription = "${show.name} Poster",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(headerHeight),
-            placeholder = debugPlaceholder(debugPreview = R.drawable.full_poster_placeholder),
-            contentScale = ContentScale.Crop
+        ShowImageWithGradientOverlay(
+            imageUrl = show.image.original,
+            imageDescription = "${show.name} Poster",
+            headerHeight = headerHeight,
+            gradientHeight = gradientHeight,
+            modifier = Modifier.align(Alignment.BottomCenter)
         )
+        BackButton(48.dp, onBack)
+        ShowDetails(show, Modifier.align(Alignment.BottomStart))
+    }
+}
 
-        GradientOverlay(
-            modifier = Modifier.align(Alignment.BottomCenter),
-            height = gradientHeight
-        )
+@Composable
+fun ShowImageWithGradientOverlay(
+    imageUrl: String,
+    imageDescription: String,
+    headerHeight: Dp,
+    gradientHeight: Dp,
+    modifier: Modifier = Modifier,
+) {
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .setupBuilder(url = imageUrl, name = imageDescription),
+        contentDescription = imageDescription,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(headerHeight),
+        placeholder = debugPlaceholder(debugPreview = R.drawable.full_poster_placeholder),
+        contentScale = ContentScale.Crop
+    )
+    GradientOverlay(
+        modifier = modifier,
+        height = gradientHeight,
+    )
+}
 
-        Icon(
-            imageVector = Icons.Default.ArrowBack,
-            contentDescription = stringResource(id = R.string.back_description),
-            modifier = Modifier
-                .padding(
-                    top = 48.dp,
-                    start = 16.dp,
-                )
-                .clickable { onBack() }
-                .align(Alignment.TopStart)
-                .size(32.dp)
-                .clip(CircleShape)
-                .background(Blue100),
-            tint = Color.White,
-        )
+@Composable
+fun BackButton(
+    topPadding: Dp,
+    onBack: () -> Unit
+) {
+    Icon(
+        imageVector = Icons.Default.ArrowBack,
+        contentDescription = stringResource(id = R.string.back_description),
+        modifier = Modifier
+            .padding(top = topPadding, start = 16.dp)
+            .clickable { onBack() }
+            .size(32.dp)
+            .clip(CircleShape)
+            .background(Blue100),
+        tint = Color.White
+    )
+}
 
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(
-                    top = 16.dp,
-                    end = 16.dp,
-                    start = 16.dp,
-                )
-        ) {
-            Text(
-                text = show.name,
-                style = TextStyle(
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
+@Composable
+fun SeasonsStatus(
+    episodes: Resource<List<EpisodeModel>>?,
+    selectedSeason: Int,
+    onSeasonClick: (Int) -> Unit,
+    onEpisodeClick: (EpisodeModel) -> Unit,
+    groupEpisodes: (List<EpisodeModel>) -> Map<Int, List<EpisodeModel>>,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier,
+    ) {
+        when (episodes?.status) {
+            Status.LOADING -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 24.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                LoadingIndicator()
+            }
+
+            Status.SUCCESS -> SeasonsSuccessContent(
+                episodes,
+                selectedSeason,
+                onSeasonClick,
+                onEpisodeClick,
+                groupEpisodes,
             )
 
-            Text(
-                text = stringResource(
-                    id = R.string.average_runtime,
-                    show.year,
-                    show.averageRuntime,
-                ),
-                style = TextStyle(
-                    color = Color.White,
-                    fontSize = 14.sp,
-                )
+            else -> ErrorMessage(
+                onRetry,
+                stringResource(id = R.string.loading_error),
             )
         }
+    }
+}
+
+@Composable
+fun SeasonsSuccessContent(
+    episodes: Resource<List<EpisodeModel>>?,
+    selectedSeason: Int,
+    onSeasonClick: (Int) -> Unit,
+    onEpisodeClick: (EpisodeModel) -> Unit,
+    groupEpisodes: (List<EpisodeModel>) -> Map<Int, List<EpisodeModel>>
+) {
+    episodes?.data?.let { episodesData ->
+        if (episodesData.isNotEmpty()) {
+            val seasonsWithEpisodes = remember { groupEpisodes(episodesData) }
+
+            Seasons(
+                seasonsWithEpisodes = seasonsWithEpisodes,
+                onSeasonClick = onSeasonClick,
+                onEpisodeClick = onEpisodeClick,
+                selectedSeason = selectedSeason,
+            )
+        } else {
+            NoShowsFoundMessage()
+        }
+    }
+}
+
+@Composable
+fun ShowDetails(
+    show: ShowModel,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(16.dp)
+    ) {
+        Text(
+            text = show.name,
+            style = TextStyle(
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        )
+        Text(
+            text = stringResource(
+                id = R.string.average_runtime,
+                show.year,
+                show.averageRuntime,
+            ),
+            style = TextStyle(
+                color = Color.White,
+                fontSize = 14.sp,
+            )
+        )
     }
 }
 
@@ -272,10 +353,37 @@ fun Schedule(
         modifier = modifier,
     ) {
         items(schedule.days) {
-            GenreChip(
+            TextChip(
                 text = "$it - ${schedule.time}",
             )
         }
+    }
+}
+
+@Composable
+fun TextChip(text: String) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .padding(end = 8.dp)
+            .border(
+                width = 1.dp,
+                color = Color.White,
+                shape = RoundedCornerShape(4.dp)
+            )
+            .background(
+                color = Color.Transparent,
+                shape = RoundedCornerShape(4.dp)
+            )
+            .padding(
+                horizontal = 8.dp,
+                vertical = 4.dp,
+            )
+    ) {
+        Text(
+            text = text,
+            color = Color.White,
+        )
     }
 }
 
@@ -315,35 +423,8 @@ fun RatingAndGenres(
 
 
         genres.forEach { genre ->
-            GenreChip(text = genre)
+            TextChip(text = genre)
         }
-    }
-}
-
-@Composable
-fun GenreChip(text: String) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .padding(end = 8.dp)
-            .border(
-                width = 1.dp,
-                color = Color.White,
-                shape = RoundedCornerShape(4.dp)
-            )
-            .background(
-                color = Color.Transparent,
-                shape = RoundedCornerShape(4.dp)
-            )
-            .padding(
-                horizontal = 8.dp,
-                vertical = 4.dp,
-            )
-    ) {
-        Text(
-            text = text,
-            color = Color.White,
-        )
     }
 }
 
@@ -398,65 +479,6 @@ fun Summary(
                 ),
             tint = Color.White,
         )
-    }
-}
-
-@Composable
-fun SeasonsStatus(
-    episodes: Resource<List<EpisodeModel>>?,
-    selectedSeason: Int,
-    onSeasonClick: (Int) -> Unit,
-    onEpisodeClick: (EpisodeModel) -> Unit,
-    groupEpisodes: (List<EpisodeModel>) -> Map<Int, List<EpisodeModel>>,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        when (episodes?.status) {
-            Status.LOADING -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp),
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = Color.White,
-                    )
-                }
-            }
-
-            Status.SUCCESS -> {
-                episodes.data?.let { episodesData ->
-                    if (episodesData.isNotEmpty()) {
-                        val seasonsWithEpisodes = remember { groupEpisodes(episodesData) }
-
-                        Seasons(
-                            seasonsWithEpisodes = seasonsWithEpisodes,
-                            onSeasonClick = onSeasonClick,
-                            onEpisodeClick = onEpisodeClick,
-                            selectedSeason = selectedSeason,
-                        )
-                    }
-                } ?: run {
-                    ErrorMessage(
-                        onRetry = onRetry,
-                        message = stringResource(id = R.string.loading_error),
-                        modifier = modifier,
-                    )
-                }
-            }
-
-            else -> {
-                ErrorMessage(
-                    onRetry = onRetry,
-                    message = stringResource(id = R.string.loading_error),
-                )
-            }
-        }
     }
 }
 
@@ -523,9 +545,9 @@ fun SeasonItem(
             .clip(CircleShape)
             .background(if (isSelected) Color.White else Blue80)
             .clickable { onSeasonClick(season) }
-            .padding(16.dp)
+            .padding(12.dp)
             .wrapContentSize()
-            .defaultMinSize(minWidth = 32.dp, minHeight = 32.dp)
+            .defaultMinSize(minWidth = 24.dp, minHeight = 24.dp)
     ) {
         Text(
             text = season.toString(),
@@ -588,7 +610,7 @@ fun EpisodeImage(
 
 @Preview
 @Composable
-fun TvShowContentDetailsPreview() {
+private fun TvShowContentDetailsPreview() {
     TvShowContentDetails(
         showModel = ShowModel.MOCK,
         onBack = {},
@@ -597,24 +619,52 @@ fun TvShowContentDetailsPreview() {
 
 @Preview
 @Composable
-fun Schedule() {
-    Schedule(
-        schedule = ScheduleModel.MOCK,
+private fun SeasonsStatusPreview() {
+    SeasonsStatus(
+        episodes = Resource(
+            status = Status.SUCCESS,
+            data = listOf(EpisodeModel.MOCK),
+            message = null,
+            errorStatus = null,
+        ),
+        selectedSeason = 1,
+        onSeasonClick = {},
+        onEpisodeClick = {},
+        groupEpisodes = { mapOf() },
+        onRetry = {},
     )
 }
 
 @Preview
 @Composable
-fun RatingAndGenresPreview() {
-    RatingAndGenres(
-        ShowModel.MOCK.rating.average,
-        ShowModel.MOCK.genres,
+private fun SeasonsSuccessContentPreview() {
+    SeasonsSuccessContent(
+        episodes = Resource(
+            status = Status.SUCCESS,
+            data = listOf(EpisodeModel.MOCK),
+            message = null,
+            errorStatus = null,
+        ),
+        selectedSeason = 1,
+        onSeasonClick = {},
+        onEpisodeClick = {},
+        groupEpisodes = { mapOf() },
     )
 }
 
 @Preview
 @Composable
-fun TvShowHeaderPreview() {
+fun SeasonItem() {
+    SeasonItem(
+        season = 1,
+        isSelected = true,
+        onSeasonClick = {},
+    )
+}
+
+@Preview
+@Composable
+private fun TvShowHeaderPreview() {
     TvShowHeader(
         show = ShowModel.MOCK,
         onBack = {},
@@ -625,13 +675,59 @@ fun TvShowHeaderPreview() {
 
 @Preview
 @Composable
-fun GenreChipPreview() {
-    GenreChip(text = "Action")
+private fun ShowImageWithGradientOverlayPreview() {
+    ShowImageWithGradientOverlay(
+        imageUrl = ShowModel.MOCK.image.original,
+        imageDescription = ShowModel.MOCK.image.original,
+        headerHeight = 200.dp,
+        gradientHeight = 100.dp,
+    )
 }
 
 @Preview
 @Composable
-fun ExpandableTestPreview() {
+private fun BackButtonPreview() {
+    BackButton(
+        topPadding = 16.dp,
+        onBack = {},
+    )
+}
+
+@Preview
+@Composable
+private fun ShowDetailsPreview() {
+    ShowDetails(
+        show = ShowModel.MOCK,
+    )
+}
+
+
+@Preview
+@Composable
+private fun SchedulePreview() {
+    Schedule(
+        schedule = ScheduleModel.MOCK,
+    )
+}
+
+@Preview
+@Composable
+private fun TextChipPreview() {
+    TextChip(text = "Action")
+}
+
+@Preview
+@Composable
+private fun RatingAndGenresPreview() {
+    RatingAndGenres(
+        ShowModel.MOCK.rating.average,
+        ShowModel.MOCK.genres,
+    )
+}
+
+@Preview
+@Composable
+private fun SummaryPreview() {
     TvMazeSeriesTheme {
         Summary(
             summary = ShowModel.MOCK.summary,
