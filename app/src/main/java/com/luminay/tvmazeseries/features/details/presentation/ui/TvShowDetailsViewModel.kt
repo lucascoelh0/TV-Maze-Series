@@ -6,12 +6,12 @@ import com.example.core.models.Resource
 import com.example.domain.models.EpisodeModel
 import com.example.domain.usecases.IShowsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class TvShowDetailsViewModel @Inject constructor(

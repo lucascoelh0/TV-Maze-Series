@@ -4,7 +4,7 @@ data class Resource<out T>(
     val status: Status,
     val data: T?,
     val message: String?,
-    val errorStatus: Any?
+    val errorStatus: Any?,
 ) {
     companion object {
         fun <T> success(data: T?): Resource<T> {
@@ -12,7 +12,7 @@ data class Resource<out T>(
                 Status.SUCCESS,
                 data,
                 null,
-                null
+                null,
             )
         }
 
@@ -21,7 +21,7 @@ data class Resource<out T>(
                 Status.ERROR,
                 data,
                 msg,
-                errorStatus
+                errorStatus,
             )
         }
 
@@ -30,7 +30,7 @@ data class Resource<out T>(
                 Status.ERROR,
                 data,
                 null,
-                exception
+                exception,
             )
         }
 
@@ -39,7 +39,7 @@ data class Resource<out T>(
                 Status.LOADING,
                 data,
                 null,
-                null
+                null,
             )
         }
     }

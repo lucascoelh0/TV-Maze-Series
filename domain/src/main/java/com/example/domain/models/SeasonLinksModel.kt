@@ -7,12 +7,12 @@ data class SeasonLinksModel(
     companion object {
         val EMPTY = SeasonLinksModel(
             self = SelfModel.EMPTY,
-            show = SeasonShowModel.EMPTY
+            show = SeasonShowModel.EMPTY,
         )
 
         val MOCK = SeasonLinksModel(
             self = SelfModel.MOCK,
-            show = SeasonShowModel.MOCK
+            show = SeasonShowModel.MOCK,
         )
     }
 }

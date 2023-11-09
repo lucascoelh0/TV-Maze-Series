@@ -6,7 +6,7 @@ import com.example.core.constants.EMPTY as EMPTY_STRING
 data class ImageModel(
     val medium: String,
     val original: String,
-): Serializable {
+) : Serializable {
     companion object {
         val EMPTY = ImageModel(
             medium = EMPTY_STRING,

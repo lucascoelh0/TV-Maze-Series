@@ -16,7 +16,7 @@ data class EpisodeModel(
     val season: Int,
     val summary: String,
     val type: String,
-    val url: String
+    val url: String,
 ) {
     companion object {
         val EMPTY = EpisodeModel(
@@ -33,7 +33,7 @@ data class EpisodeModel(
             season = 0,
             summary = EMPTY_STRING,
             type = EMPTY_STRING,
-            url = EMPTY_STRING
+            url = EMPTY_STRING,
         )
 
         val MOCK = EpisodeModel(
@@ -50,7 +50,7 @@ data class EpisodeModel(
             season = 1,
             summary = "Geralt of Rivia...",
             type = "Scripted",
-            url = "https://api.tvmaze.com/seasons/1"
+            url = "https://api.tvmaze.com/seasons/1",
         )
     }
 }

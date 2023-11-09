@@ -90,7 +90,7 @@ fun TvShowDetailsScreen(
     ) {
         TvShowContentDetails(
             showModel = showModel,
-            onBack = { navigator.popBackStack() }
+            onBack = { navigator.popBackStack() },
         )
     }
 }
@@ -141,7 +141,7 @@ private fun TvShowContentDetails(
                     top = 16.dp,
                     end = 16.dp,
                     start = 16.dp,
-                )
+                ),
         )
 
         RatingAndGenres(
@@ -156,7 +156,7 @@ private fun TvShowContentDetails(
                     top = 16.dp,
                     end = 16.dp,
                     start = 16.dp,
-                )
+                ),
         )
 
         SeasonsStatus(
@@ -191,14 +191,14 @@ fun TvShowHeader(
     Box(
         modifier = modifier
             .height(headerHeight)
-            .fillMaxWidth()
+            .fillMaxWidth(),
     ) {
         ShowImageWithGradientOverlay(
             imageUrl = show.image.original,
             imageDescription = "${show.name} Poster",
             headerHeight = headerHeight,
             gradientHeight = gradientHeight,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier.align(Alignment.BottomCenter),
         )
         BackButton(48.dp, onBack)
         ShowDetails(show, Modifier.align(Alignment.BottomStart))
@@ -221,7 +221,7 @@ fun ShowImageWithGradientOverlay(
             .fillMaxWidth()
             .height(headerHeight),
         placeholder = debugPlaceholder(debugPreview = R.drawable.full_poster_placeholder),
-        contentScale = ContentScale.Crop
+        contentScale = ContentScale.Crop,
     )
     GradientOverlay(
         modifier = modifier,
@@ -232,7 +232,7 @@ fun ShowImageWithGradientOverlay(
 @Composable
 fun BackButton(
     topPadding: Dp,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     Icon(
         imageVector = Icons.Default.ArrowBack,
@@ -243,7 +243,7 @@ fun BackButton(
             .size(32.dp)
             .clip(CircleShape)
             .background(Blue100),
-        tint = Color.White
+        tint = Color.White,
     )
 }
 
@@ -294,7 +294,7 @@ fun SeasonsSuccessContent(
     selectedSeason: Int,
     onSeasonClick: (Int) -> Unit,
     onEpisodeClick: (EpisodeModel) -> Unit,
-    groupEpisodes: (List<EpisodeModel>) -> Map<Int, List<EpisodeModel>>
+    groupEpisodes: (List<EpisodeModel>) -> Map<Int, List<EpisodeModel>>,
 ) {
     episodes?.data?.let { episodesData ->
         if (episodesData.isNotEmpty()) {
@@ -315,18 +315,18 @@ fun SeasonsSuccessContent(
 @Composable
 fun ShowDetails(
     show: ShowModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.padding(16.dp)
+        modifier = modifier.padding(16.dp),
     ) {
         Text(
             text = show.name,
             style = TextStyle(
                 color = Color.White,
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
+                fontWeight = FontWeight.Bold,
+            ),
         )
         Text(
             text = stringResource(
@@ -337,7 +337,7 @@ fun ShowDetails(
             style = TextStyle(
                 color = Color.White,
                 fontSize = 14.sp,
-            )
+            ),
         )
     }
 }
@@ -369,16 +369,16 @@ fun TextChip(text: String) {
             .border(
                 width = 1.dp,
                 color = Color.White,
-                shape = RoundedCornerShape(4.dp)
+                shape = RoundedCornerShape(4.dp),
             )
             .background(
                 color = Color.Transparent,
-                shape = RoundedCornerShape(4.dp)
+                shape = RoundedCornerShape(4.dp),
             )
             .padding(
                 horizontal = 8.dp,
                 vertical = 4.dp,
-            )
+            ),
     ) {
         Text(
             text = text,
@@ -399,7 +399,7 @@ fun RatingAndGenres(
             .padding(
                 top = 8.dp,
                 end = 8.dp,
-                start = 16.dp
+                start = 16.dp,
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -420,7 +420,6 @@ fun RatingAndGenres(
                     ),
             )
         }
-
 
         genres.forEach { genre ->
             TextChip(text = genre)
@@ -452,13 +451,13 @@ fun Summary(
                 style = TextStyle(
                     color = Color.White,
                     fontSize = 14.sp,
-                )
+                ),
             )
 
             if (!expanded) {
                 GradientOverlay(
                     modifier = Modifier.align(Alignment.BottomCenter),
-                    height = gradientHeight
+                    height = gradientHeight,
                 )
             }
         }
@@ -475,7 +474,7 @@ fun Summary(
             modifier = Modifier
                 .size(24.dp)
                 .animateContentSize(
-                    animationSpec = tween(durationMillis = 300)
+                    animationSpec = tween(durationMillis = 300),
                 ),
             tint = Color.White,
         )
@@ -508,24 +507,24 @@ fun Seasons(
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(8.dp),
         ) {
             items(seasons) { season ->
                 SeasonItem(
                     season = season,
                     isSelected = season == selectedSeason,
-                    onSeasonClick = onSeasonClick
+                    onSeasonClick = onSeasonClick,
                 )
             }
         }
 
         LazyRow(
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(8.dp),
         ) {
             items(episodes) { episode ->
                 EpisodeItem(
                     episode = episode,
-                    onEpisodeClick = onEpisodeClick
+                    onEpisodeClick = onEpisodeClick,
                 )
             }
         }
@@ -536,7 +535,7 @@ fun Seasons(
 fun SeasonItem(
     season: Int,
     isSelected: Boolean,
-    onSeasonClick: (Int) -> Unit
+    onSeasonClick: (Int) -> Unit,
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -547,14 +546,14 @@ fun SeasonItem(
             .clickable { onSeasonClick(season) }
             .padding(12.dp)
             .wrapContentSize()
-            .defaultMinSize(minWidth = 24.dp, minHeight = 24.dp)
+            .defaultMinSize(minWidth = 24.dp, minHeight = 24.dp),
     ) {
         Text(
             text = season.toString(),
             color = if (isSelected) Blue100 else Color.White,
             style = MaterialTheme.typography.bodyMedium.copy(
-                color = if (isSelected) Blue100 else Color.White
-            )
+                color = if (isSelected) Blue100 else Color.White,
+            ),
         )
     }
 }
@@ -562,13 +561,13 @@ fun SeasonItem(
 @Composable
 fun EpisodeItem(
     episode: EpisodeModel,
-    onEpisodeClick: (EpisodeModel) -> Unit
+    onEpisodeClick: (EpisodeModel) -> Unit,
 ) {
     Column(
         modifier = Modifier
             .padding(8.dp)
             .width(128.dp)
-            .clickable { onEpisodeClick(episode) }
+            .clickable { onEpisodeClick(episode) },
     ) {
         EpisodeImage(
             imageUrl = episode.image.original,
@@ -669,7 +668,7 @@ private fun TvShowHeaderPreview() {
         show = ShowModel.MOCK,
         onBack = {},
         modifier = Modifier
-            .width(400.dp)
+            .width(400.dp),
     )
 }
 
@@ -700,7 +699,6 @@ private fun ShowDetailsPreview() {
         show = ShowModel.MOCK,
     )
 }
-
 
 @Preview
 @Composable

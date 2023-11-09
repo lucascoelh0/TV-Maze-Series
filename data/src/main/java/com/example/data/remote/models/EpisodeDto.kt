@@ -34,7 +34,7 @@ data class EpisodeDto(
     @SerializedName("type")
     val type: String? = null,
     @SerializedName("url")
-    val url: String? = null
+    val url: String? = null,
 )
 
 fun EpisodeDto.toModel() = EpisodeModel(
@@ -51,7 +51,7 @@ fun EpisodeDto.toModel() = EpisodeModel(
     season = season ?: -1,
     summary = summary.orEmpty(),
     type = type.orEmpty(),
-    url = url.orEmpty()
+    url = url.orEmpty(),
 )
 
 fun List<EpisodeDto>.toModel() = map { it.toModel() }

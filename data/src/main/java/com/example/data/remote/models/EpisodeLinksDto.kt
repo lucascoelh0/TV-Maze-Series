@@ -9,7 +9,7 @@ data class EpisodeLinksDto(
     @SerializedName("self")
     val self: SelfDto? = null,
     @SerializedName("show")
-    val show: EpisodeShowDto? = null
+    val show: EpisodeShowDto? = null,
 )
 
 fun EpisodeLinksDto.toModel() = SeasonLinksModel(

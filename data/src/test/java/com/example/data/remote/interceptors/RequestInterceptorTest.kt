@@ -2,7 +2,6 @@ package com.example.data.remote.interceptors
 
 import com.example.data.BuildConfig
 import com.example.data.remote.URL
-import com.example.data.remote.interceptors.RequestInterceptor
 import com.example.data.remote.interceptors.RequestInterceptor.Companion.X_RAPID_API_HOST
 import com.example.data.remote.interceptors.RequestInterceptor.Companion.X_RAPID_API_KEY
 import io.mockk.every
@@ -29,10 +28,12 @@ class RequestInterceptorTest {
         requestInterceptor.intercept(chain)
 
         verify {
-            chain.proceed(withArg { modifiedRequest ->
-                TestCase.assertEquals(BuildConfig.API_KEY, modifiedRequest.header(X_RAPID_API_KEY))
-                TestCase.assertEquals(RequestInterceptor.API_HOST, modifiedRequest.header(X_RAPID_API_HOST))
-            })
+            chain.proceed(
+                withArg { modifiedRequest ->
+                    TestCase.assertEquals(BuildConfig.API_KEY, modifiedRequest.header(X_RAPID_API_KEY))
+                    TestCase.assertEquals(RequestInterceptor.API_HOST, modifiedRequest.header(X_RAPID_API_HOST))
+                },
+            )
         }
     }
 }

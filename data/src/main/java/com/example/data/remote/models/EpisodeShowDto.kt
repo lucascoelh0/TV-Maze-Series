@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 
 data class EpisodeShowDto(
     @SerializedName("href")
-    val href: String? = null
+    val href: String? = null,
 )
 
 fun EpisodeShowDto.toModel() = SeasonShowModel(

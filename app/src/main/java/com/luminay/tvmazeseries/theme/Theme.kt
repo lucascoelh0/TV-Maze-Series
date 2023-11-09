@@ -26,10 +26,10 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun TvMazeSeriesTheme(
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     MaterialTheme(
         colorScheme = LightColorScheme,
-        content = content
+        content = content,
     )
 }

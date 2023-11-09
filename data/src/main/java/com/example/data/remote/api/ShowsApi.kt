@@ -13,7 +13,7 @@ interface ShowsApi {
 
     @GET("/shows")
     suspend fun getShows(
-        @Query("page") page: Int = 0
+        @Query("page") page: Int = 0,
     ): NetworkResponse<List<ShowDto>, GenericErrorResponse>
 
     @GET("/search/shows")

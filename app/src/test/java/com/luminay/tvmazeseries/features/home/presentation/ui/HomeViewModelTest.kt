@@ -65,18 +65,16 @@ class HomeViewModelTest {
         assertEquals(result, listOf(Resource.loading(null), Resource.success(shows)))
     }
 
-
     @Test
     fun `searchShows should emit success with search results`() = runTest {
         val searchResultShows = listOf(
-            SearchShowModel.MOCK
+            SearchShowModel.MOCK,
         )
         val searchTerm = "search"
         coEvery { showsUseCase.searchShows(searchTerm) } returns flowOf(Resource.success(searchResultShows))
 
         viewModel.updateSearchQuery(searchTerm)
         viewModel.searchShows()
-
 
         val successResult = viewModel.unifiedShows.first()
         assertEquals(Resource.success(searchResultShows.map { it.show }), successResult)

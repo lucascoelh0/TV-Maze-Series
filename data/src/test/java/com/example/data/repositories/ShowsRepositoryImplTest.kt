@@ -16,12 +16,12 @@ import com.haroldadmin.cnradapter.NetworkResponse
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.impl.annotations.MockK
-import java.io.IOException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import java.io.IOException
 
 class ShowsRepositoryImplTest {
 

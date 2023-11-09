@@ -10,9 +10,9 @@ import com.example.data.remote.UNKNOWN_ERROR
 import com.example.data.remote.models.GenericErrorResponse
 import com.example.data.remote.utils.handleNetworkResponse
 import com.haroldadmin.cnradapter.NetworkResponse
-import java.io.IOException
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
+import java.io.IOException
 
 class NetworkUtilsTest {
 

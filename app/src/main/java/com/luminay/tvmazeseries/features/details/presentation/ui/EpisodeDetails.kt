@@ -34,11 +34,11 @@ fun EpisodeDetails(
                     topEnd = 16.dp,
                     topStart = 16.dp,
                 ),
-            )
+            ),
     ) {
         Column(
             modifier = modifier
-                .padding(8.dp)
+                .padding(8.dp),
         ) {
             if (episode.image.original.isNotEmpty()) {
                 EpisodeImage(
@@ -55,7 +55,7 @@ fun EpisodeDetails(
                 style = TextStyle(
                     color = Color.White,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 ),
             )
 
@@ -68,7 +68,7 @@ fun EpisodeDetails(
                 style = TextStyle(
                     color = Color.White,
                     fontSize = 14.sp,
-                )
+                ),
             )
 
             if (episode.summary.isNotEmpty()) {
@@ -78,7 +78,7 @@ fun EpisodeDetails(
                     style = TextStyle(
                         color = Color.White,
                         fontSize = 14.sp,
-                    )
+                    ),
                 )
             }
         }

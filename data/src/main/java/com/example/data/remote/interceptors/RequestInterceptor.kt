@@ -1,9 +1,9 @@
 package com.example.data.remote.interceptors
 
 import com.example.data.BuildConfig
-import java.io.IOException
 import okhttp3.Interceptor
 import okhttp3.Response
+import java.io.IOException
 
 class RequestInterceptor : Interceptor {
     @Throws(IOException::class)

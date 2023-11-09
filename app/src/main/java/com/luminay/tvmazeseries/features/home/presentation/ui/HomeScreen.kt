@@ -77,7 +77,7 @@ fun HomeScreen(
                 },
                 isSearchBarEnabled = true,
             )
-        }
+        },
     ) {
         TvShowStatus(
             paddingValues = it,
@@ -88,7 +88,7 @@ fun HomeScreen(
                     TvShowDetailsScreenDestination(
                         id = id,
                         showModel = show,
-                    )
+                    ),
                 )
             },
             onRetry = { viewModel.fetchData() },
@@ -132,7 +132,7 @@ private fun TvShowStatus(
 private fun ShowsListOrEmpty(
     showsResource: Resource<List<ShowModel>>,
     searchQuery: String,
-    onShowClick: (ShowModel) -> Unit
+    onShowClick: (ShowModel) -> Unit,
 ) {
     showsResource.data?.let { shows ->
         if (shows.isNotEmpty()) {
@@ -225,14 +225,14 @@ fun TvShowsList(
                     show = show,
                     modifier = Modifier.clickable {
                         onShowClick(show)
-                    }
+                    },
                 )
             }
 
             item(
                 span = {
                     GridItemSpan(3)
-                }
+                },
             ) {
                 when (paginationStatus?.status) {
                     Status.LOADING -> {

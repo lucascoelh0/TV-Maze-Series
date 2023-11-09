@@ -9,7 +9,6 @@ import com.example.domain.models.SearchShowModel
 import com.example.domain.models.ShowModel
 import com.example.domain.usecases.IShowsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +19,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -41,7 +41,6 @@ class HomeViewModel @Inject constructor(
 
     private var currentPage = 1
     private var isPageLoading = false
-
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val unifiedShows: Flow<Resource<List<ShowModel>>> = _searchQuery.flatMapLatest { query ->
@@ -131,7 +130,6 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-
 
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query

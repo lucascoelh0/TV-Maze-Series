@@ -49,7 +49,7 @@ fun SearchBarWithBorder(
                 width = 2.dp,
                 color = borderColor,
                 shape = RoundedCornerShape(32.dp),
-            )
+            ),
     ) {
         TextField(
             value = searchTerm,
@@ -85,8 +85,8 @@ fun SearchBarWithBorder(
                 keyboardController?.hide()
             }),
             keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Search
-            )
+                imeAction = ImeAction.Search,
+            ),
         )
     }
 }

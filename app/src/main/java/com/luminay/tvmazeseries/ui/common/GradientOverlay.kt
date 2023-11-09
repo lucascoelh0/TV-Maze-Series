@@ -15,17 +15,16 @@ import com.luminay.tvmazeseries.theme.Blue100
 fun GradientOverlay(
     modifier: Modifier = Modifier,
     colors: List<Color> = listOf(Color.Transparent, Blue100),
-    height: Dp
+    height: Dp,
 ) {
     val gradientModifier = modifier
         .height(height)
         .fillMaxWidth()
         .background(
             brush = Brush.verticalGradient(
-                colors = colors
-            )
+                colors = colors,
+            ),
         )
 
     Box(modifier = gradientModifier)
 }
-
