@@ -542,7 +542,6 @@ fun EpisodeItem(
     episode: EpisodeModel,
     onEpisodeClick: (EpisodeModel) -> Unit
 ) {
-    Log.e("EpisodeItem", "EpisodeItem: $episode")
     Column(
         modifier = Modifier
             .padding(8.dp)
