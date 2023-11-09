@@ -52,7 +52,7 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `fetchNextPage should emit loading then matches`() = runTest {
+    fun `fetchNextPage should emit loading then shows`() = runTest {
         val shows = listOf(
             ShowModel.MOCK,
             ShowModel.MOCK,
