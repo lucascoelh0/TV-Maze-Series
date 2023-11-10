@@ -11,7 +11,6 @@ import com.example.domain.models.ShowModel
 import com.example.domain.usecases.IFavoriteUseCase
 import com.example.domain.usecases.IShowsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +20,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -59,7 +59,7 @@ class HomeViewModel @Inject constructor(
         _favorites,
         _allShows,
         _searchResults,
-        _showFavorites
+        _showFavorites,
     ) { query, favorites, allShowsResource, searchResultsResource, showFavorites ->
         val favoriteIds = favorites.map { it.id }.toSet()
 
@@ -67,7 +67,7 @@ class HomeViewModel @Inject constructor(
             showFavorites -> processFavorites(allShowsResource, favoriteIds, query)
             query.isNotBlank() && searchResultsResource.status == Status.SUCCESS -> processSearchResults(
                 searchResultsResource,
-                favoriteIds
+                favoriteIds,
             )
 
             allShowsResource.status == Status.SUCCESS -> processAllShows(allShowsResource, favoriteIds)
@@ -78,7 +78,7 @@ class HomeViewModel @Inject constructor(
     private fun processFavorites(
         allShowsResource: Resource<List<ShowModel>>,
         favoriteIds: Set<Int>,
-        query: String
+        query: String,
     ): Resource<List<ShowModel>> {
         val favoriteShows = allShowsResource.data
             ?.asSequence()
@@ -92,7 +92,7 @@ class HomeViewModel @Inject constructor(
 
     private fun processSearchResults(
         searchResultsResource: Resource<List<SearchShowModel>>,
-        favoriteIds: Set<Int>
+        favoriteIds: Set<Int>,
     ): Resource<List<ShowModel>> {
         val searchResults = searchResultsResource.data
             ?.map { it.show.copy(isFavorite = it.show.id in favoriteIds) }
@@ -102,7 +102,7 @@ class HomeViewModel @Inject constructor(
 
     private fun processAllShows(
         allShowsResource: Resource<List<ShowModel>>,
-        favoriteIds: Set<Int>
+        favoriteIds: Set<Int>,
     ): Resource<List<ShowModel>> {
         val allShows = allShowsResource.data
             ?.map { it.copy(isFavorite = it.id in favoriteIds) }

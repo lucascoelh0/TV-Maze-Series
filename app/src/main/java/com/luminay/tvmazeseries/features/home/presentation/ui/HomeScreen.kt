@@ -160,7 +160,7 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxSize(),
                 )
             }
-        }
+        },
     )
 }
 

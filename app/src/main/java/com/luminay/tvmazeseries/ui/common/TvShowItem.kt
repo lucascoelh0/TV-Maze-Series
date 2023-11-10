@@ -43,7 +43,7 @@ fun TvShowItem(
                 shape = RoundedCornerShape(8.dp),
             )
             .padding(2.dp)
-            .width(120.dp)
+            .width(120.dp),
     ) {
         Column(
             verticalArrangement = Arrangement.Top,
