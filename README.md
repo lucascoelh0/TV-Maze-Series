@@ -1,5 +1,5 @@
 # TV Maze Series
-This app displays tv showstv shows, and the user can see it's details and add favorites.
+This app displays tv shows, and the user can see it's details and add favorites.
 
 To run the project, create a variable API_KEY="your_key_here" on local.properties. 
 
