@@ -599,7 +599,7 @@ fun EpisodeImage(
             ),
         contentDescription = stringResource(id = R.string.episode_image),
         modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(16.dp))
             .fillMaxWidth()
             .height(height),
         contentScale = ContentScale.Crop,
