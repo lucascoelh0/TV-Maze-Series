@@ -28,4 +28,5 @@ object Version {
     const val coroutinesTesting = "1.7.3"
     const val splashScreen = "1.0.1"
     const val ksp = "1.8.10-1.0.9"
+    const val room = "2.6.0"
 }

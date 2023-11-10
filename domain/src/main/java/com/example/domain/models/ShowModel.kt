@@ -24,6 +24,7 @@ data class ShowModel(
     val updated: Int,
     val url: String,
     val weight: Int,
+    val isFavorite: Boolean = false,
 ) : Serializable {
 
     val year: String

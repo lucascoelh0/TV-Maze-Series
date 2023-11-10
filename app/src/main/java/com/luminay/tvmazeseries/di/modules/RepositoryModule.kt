@@ -1,6 +1,8 @@
 package com.luminay.tvmazeseries.di.modules
 
+import com.example.data.remote.repositories.FavoriteRepositoryImpl
 import com.example.data.remote.repositories.ShowsRepositoryImpl
+import com.example.domain.repositories.IFavoriteRepository
 import com.example.domain.repositories.IShowsRepository
 import dagger.Binds
 import dagger.Module
@@ -13,4 +15,7 @@ interface RepositoryModule {
 
     @Binds
     fun providesShowsRepository(showsRepository: ShowsRepositoryImpl): IShowsRepository
+
+    @Binds
+    fun providesFavoriteRepository(favoriteRepository: FavoriteRepositoryImpl): IFavoriteRepository
 }

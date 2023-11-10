@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,7 +15,18 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,40 +73,95 @@ fun HomeScreen(
     navigator: DestinationsNavigator,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
+    val scope = rememberCoroutineScope()
     val showsResource by viewModel.unifiedShows.collectAsStateWithLifecycle(initialValue = Resource.loading(null))
     val searchTerm by viewModel.searchQuery.collectAsStateWithLifecycle(initialValue = EMPTY)
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
 
-    Scaffold(
-        topBar = {
-            TopBar(
-                searchTerm = searchTerm,
-                onQueryChange = { value ->
-                    viewModel.updateSearchQuery(value)
-                    viewModel.searchShows()
-                },
-                onSearch = {
-                    viewModel.searchShows()
-                },
-                isSearchBarEnabled = true,
-            )
-        },
-    ) {
-        TvShowStatus(
-            paddingValues = it,
-            showsResource = showsResource,
-            searchQuery = searchTerm,
-            onShowClick = { show ->
-                navigator.navigate(
-                    TvShowDetailsScreenDestination(
-                        id = id,
-                        showModel = show,
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Text(
+                    stringResource(id = R.string.app_name),
+                    modifier = Modifier.padding(16.dp),
+                    color = Color.White,
+                )
+
+                Divider()
+
+                NavigationDrawerItem(
+                    label = { Text(text = stringResource(id = R.string.tv_shows)) },
+                    selected = false,
+                    onClick = {
+                        viewModel.shouldShowFavorites(false)
+                        scope.launch {
+                            drawerState.close()
+                        }
+                    },
+                    colors = NavigationDrawerItemDefaults.colors(
+                        unselectedTextColor = Color.White,
+                        selectedTextColor = Color.White,
                     ),
                 )
-            },
-            onRetry = { viewModel.fetchData() },
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
+
+                NavigationDrawerItem(
+                    label = { Text(text = stringResource(id = R.string.favorites)) },
+                    selected = false,
+                    onClick = {
+                        viewModel.shouldShowFavorites(true)
+                        scope.launch {
+                            drawerState.close()
+                        }
+                    },
+                    colors = NavigationDrawerItemDefaults.colors(
+                        unselectedTextColor = Color.White,
+                        selectedTextColor = Color.White,
+                    ),
+                )
+            }
+        },
+        content = {
+            Scaffold(
+                topBar = {
+                    TopBar(
+                        onClickMenu = {
+                            scope.launch {
+                                drawerState.apply {
+                                    if (isClosed) open() else close()
+                                }
+                            }
+                        },
+                        searchTerm = searchTerm,
+                        onQueryChange = { value ->
+                            viewModel.updateSearchQuery(value)
+                            viewModel.searchShows()
+                        },
+                        onSearch = {
+                            viewModel.searchShows()
+                        },
+                        isSearchBarEnabled = true,
+                    )
+                },
+            ) {
+                TvShowStatus(
+                    paddingValues = it,
+                    showsResource = showsResource,
+                    searchQuery = searchTerm,
+                    onShowClick = { show ->
+                        navigator.navigate(
+                            TvShowDetailsScreenDestination(
+                                id = id,
+                                showModel = show,
+                            ),
+                        )
+                    },
+                    onRetry = { viewModel.fetchData() },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        },
+    )
 }
 
 @Composable
@@ -149,12 +216,13 @@ private fun ShowsListOrEmpty(
 
 @Composable
 private fun TopBar(
+    onClickMenu: () -> Unit = {},
     searchTerm: String,
     isSearchBarEnabled: Boolean,
     onQueryChange: (String) -> Unit,
     onSearch: () -> Unit,
 ) {
-    Box(
+    Row(
         modifier = Modifier
             .background(color = Blue80)
             .padding(
@@ -164,7 +232,19 @@ private fun TopBar(
                 start = 8.dp,
             )
             .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
+        Icon(
+            imageVector = Icons.Default.Menu,
+            contentDescription = stringResource(id = R.string.drawer_description),
+            modifier = Modifier
+                .padding(8.dp)
+                .clickable {
+                    onClickMenu()
+                },
+            tint = Color.White,
+        )
+
         SearchBarWithBorder(
             searchTerm = searchTerm,
             onQueryChange = {
@@ -188,9 +268,10 @@ fun TvShowsList(
     val lazyGridState = rememberLazyGridState()
     val paginationStatus by viewModel.paginationStatus.collectAsStateWithLifecycle(initialValue = null)
     var isRefreshing by remember { mutableStateOf(false) }
+    val showFavorites by viewModel.showFavorites.collectAsStateWithLifecycle(false)
 
     fun refresh() {
-        if (searchQuery.isEmpty()) {
+        if (searchQuery.isEmpty() && !showFavorites) {
             refreshScope.launch {
                 isRefreshing = true
                 viewModel.fetchData()
@@ -205,7 +286,7 @@ fun TvShowsList(
             lazyGridState.isScrolledToEnd()
         }
             .distinctUntilChanged()
-            .filter { it && !isRefreshing }
+            .filter { it && !isRefreshing && !showFavorites }
             .collect {
                 viewModel.fetchNextPage()
             }
@@ -226,6 +307,13 @@ fun TvShowsList(
                     modifier = Modifier.clickable {
                         onShowClick(show)
                     },
+                    onFavoriteClick = {
+                        if (show.isFavorite) {
+                            viewModel.removeFavorite(show)
+                        } else {
+                            viewModel.addFavorite(show)
+                        }
+                    },
                 )
             }
 
@@ -236,12 +324,14 @@ fun TvShowsList(
             ) {
                 when (paginationStatus?.status) {
                     Status.LOADING -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 24.dp),
-                        ) {
-                            LoadingIndicator(modifier = Modifier.align(Alignment.Center))
+                        if (!showFavorites) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 24.dp),
+                            ) {
+                                LoadingIndicator(modifier = Modifier.align(Alignment.Center))
+                            }
                         }
                     }
 
@@ -257,13 +347,15 @@ fun TvShowsList(
             }
         }
 
-        PullRefreshIndicator(
-            refreshing = isRefreshing,
-            state = state,
-            modifier = Modifier.align(Alignment.TopCenter),
-            backgroundColor = Color.White,
-            contentColor = Purple80,
-        )
+        if (!showFavorites) {
+            PullRefreshIndicator(
+                refreshing = isRefreshing,
+                state = state,
+                modifier = Modifier.align(Alignment.TopCenter),
+                backgroundColor = Color.White,
+                contentColor = Purple80,
+            )
+        }
     }
 }
 
